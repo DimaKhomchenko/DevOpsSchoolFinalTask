@@ -1,0 +1,39 @@
+---
+- name: Connect to localhost  
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Ensure packages are installed
+      apt: 
+        name: ['docker.io', 'python3-pip'] 
+        state: present
+      become: yes
+
+    - name: Ensure docker-py is installed
+      pip: 
+        name: docker-py
+        state: present
+      become: yes
+        
+    - name: Ensure user is in docker group
+      user:
+        name: ubuntu
+        groups: docker
+        state: present
+      become: yes
+
+    - name: Ensure dockerhub login
+      docker_login:
+        username: username
+        password: password
+      
+    - name: Build image from Dockerfile and push to registry
+      docker_image:
+        name: username/webserver
+        tag: v0.1
+        build:
+          path: "/tmp"
+        source: build
+        state: present
+        push: yes
